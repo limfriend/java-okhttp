@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import io.opentracing.Tracer;
 import io.opentracing.tag.Tags;
@@ -33,7 +34,6 @@ public class TracingInterceptor implements Interceptor {
 
     private Tracer tracer;
     private List<OkHttpClientSpanDecorator> decorators;
-
 
     /**
      * Create tracing interceptor. Interceptor has to be added to {@link OkHttpClient.Builder#addInterceptor(Interceptor)}
@@ -74,6 +74,13 @@ public class TracingInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Response response = null;
+
+        if (chain.request().url() != null) {
+            String url = chain.request().url().url().toString();
+            if (url != null && !SkipPatternUtil.isTraced(url)) {
+                return chain.proceed(chain.request().newBuilder().build());
+            }
+        }
 
         // application interceptor?
         if (chain.connection() == null) {

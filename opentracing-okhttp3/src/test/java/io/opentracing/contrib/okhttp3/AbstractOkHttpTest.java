@@ -412,6 +412,23 @@ public abstract class AbstractOkHttpTest {
         Assert.assertEquals("localhost", networkSpan.tags().get(Tags.PEER_HOSTNAME.getKey()));
     }
 
+    @Test
+    public void testSkipTracing() throws IOException {
+
+        {
+            mockWebServer.enqueue(new MockResponse()
+                    .setResponseCode(200));
+            client.newCall(new Request.Builder()
+                    .url(mockWebServer.url("/healthabc?foo1"))
+                    .build())
+                    .execute();
+        }
+
+        List<MockSpan> mockSpans = mockTracer.finishedSpans();
+        Assert.assertEquals(0, mockSpans.size());
+
+    }
+
     protected void assertLocalSpan(List<MockSpan> mockSpans) {
         MockSpan localSpan = mockSpans.get(mockSpans.size() - 1);
         Assert.assertNotNull(localSpan.tags().get(Tags.COMPONENT.getKey()));

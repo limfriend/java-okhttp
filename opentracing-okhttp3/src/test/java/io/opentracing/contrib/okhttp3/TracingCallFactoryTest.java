@@ -11,6 +11,10 @@ import okhttp3.OkHttpClient;
  */
 public class TracingCallFactoryTest extends AbstractOkHttpTest {
 
+    static {
+        System.setProperty(SkipPatternUtil.SKIP_PATTERN_PROPERTY_KEY, "/health*");
+    }
+
     public TracingCallFactoryTest() {
         super(new TracingCallFactory(new OkHttpClient(), AbstractOkHttpTest.mockTracer));
     }

@@ -42,6 +42,12 @@ public class TracingCallFactory implements Call.Factory {
 
     @Override
     public Call newCall(final Request request) {
+        if (request.url() != null) {
+            String url = request.url().url().toString();
+            if (url != null && !SkipPatternUtil.isTraced(url)) {
+                return okHttpClient.newBuilder().build().newCall(request);
+            }
+        }
         final Span span = tracer.buildSpan(request.method())
             .withTag(Tags.COMPONENT.getKey(), COMPONENT_NAME)
             .start();
